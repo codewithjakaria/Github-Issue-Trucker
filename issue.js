@@ -60,9 +60,6 @@ const container = document.getElementById('issuesContainer');
 const loader = document.getElementById('loader');
 const countDisplay = document.getElementById('issueCountDisplay');
 
-/* -------------------------
-   SHOW MODAL
--------------------------- */
 const showIssueModal = async id => {
   try {
     const result = await fetchSingleIssue(id);
@@ -99,7 +96,6 @@ const showIssueModal = async id => {
     console.error(err);
   }
 };
-
 
 const loadIssues = async (type = 'all') => {
   try {
@@ -156,7 +152,7 @@ const loadIssues = async (type = 'all') => {
   }
 };
 
-// Event Listeners
+
 document
   .getElementById('btn-all')
   ?.addEventListener('click', () => loadIssues('all'));
