@@ -140,7 +140,7 @@ const loadIssues = async (type = 'all') => {
           <div class="flex flex-wrap gap-2 mb-6">${renderTags(issue.labels || issue.tags)}</div>
         </div>
         <div class="mt-auto pt-4 text-[12px] text-[#6B7280] font-medium border-t border-gray-50">
-          <p>#1 by Jakaria Ahmed</p>
+          <p>#1 by John_doe</p>
           <p>22/02/2026</p>
         </div>`;
       container.appendChild(card);
@@ -151,7 +151,6 @@ const loadIssues = async (type = 'all') => {
     if (loader) loader.classList.add('hidden');
   }
 };
-
 
 document
   .getElementById('btn-all')
@@ -164,3 +163,92 @@ document
   ?.addEventListener('click', () => loadIssues('closed'));
 
 loadIssues();
+
+const renderIssues = issues => {
+  container.innerHTML = '';
+
+
+  if (countDisplay) countDisplay.innerText = `${issues.length} Issues`;
+
+  issues.forEach(issue => {
+    const isOpen = issue.status?.toLowerCase() === 'open';
+    const statusIcon = isOpen
+      ? './assets/Open-Status.png'
+      : './assets/Closed- Status .png';
+    const borderColor = isOpen ? 'border-[#22C55E]' : 'border-[#A855F7]';
+    const priority = (issue.priority || 'Medium').toUpperCase();
+
+    let priorityClass = 'bg-[#F2F4F7] text-[#667085]';
+    if (priority === 'HIGH') priorityClass = 'bg-[#FFF0F0] text-[#FF5C5C]';
+    if (priority === 'MEDIUM') priorityClass = 'bg-[#FFF9EB] text-[#FDB022]';
+
+    const card = document.createElement('div');
+    card.className = `bg-white p-6 rounded-[4px] border-t-[4px] ${borderColor} shadow-[0px_2px_8px_rgba(0,0,0,0.06)] flex flex-col justify-between cursor-pointer hover:shadow-lg transition-all`;
+    card.onclick = () => showIssueModal(issue._id || issue.id);
+
+    card.innerHTML = `
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <img src="${statusIcon}" class="w-6 h-6 object-contain">
+          <span class="px-2 py-0.5 text-[10px] font-bold rounded uppercase ${priorityClass}">${priority}</span>
+        </div>
+        <h3 class="font-bold text-[16px] text-[#111827] mb-2 leading-tight">${issue.title}</h3>
+        <p class="text-[13px] text-[#6B7280] mb-5 line-clamp-2">${issue.description || 'No description available...'}</p>
+        <div class="flex flex-wrap gap-2 mb-6">${renderTags(issue.labels || issue.tags)}</div>
+      </div>
+      <div class="mt-auto pt-4 text-[12px] text-[#6B7280] font-medium border-t border-gray-50">
+        <p>#1 by john_doe</p>
+        <p>22/02/2026</p>
+      </div>`;
+    container.appendChild(card);
+  });
+};
+
+
+const handleSearch = async () => {
+  const searchInput = document.getElementById('searchInput');
+  const query = searchInput.value.trim();
+
+  if (!query) {
+    loadIssues('all');
+    return;
+  }
+
+  try {
+    if (loader) loader.classList.remove('hidden');
+    const res = await fetch(
+      `https://phi-lab-server.vercel.app/api/v1/lab/issues/search?q=${query}`,
+    );
+    const result = await res.json();
+    renderIssues(result.data || []);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (loader) loader.classList.add('hidden');
+  }
+};
+
+
+document.getElementById('searchBtn')?.addEventListener('click', handleSearch);
+
+
+const loadIssue = async (type = 'all') => {
+  try {
+    if (loader) loader.classList.remove('hidden');
+    updateTabStyles(type);
+
+    const result = await fetchAllIssues();
+    let issues = result.data || [];
+
+    if (type === 'open')
+      issues = issues.filter(i => i.status?.toLowerCase() === 'open');
+    if (type === 'closed')
+      issues = issues.filter(i => i.status?.toLowerCase() === 'closed');
+
+    renderIssues(issues);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (loader) loader.classList.add('hidden');
+  }
+};
