@@ -7,7 +7,6 @@ loginBtn.addEventListener('click', function () {
   if (username === 'admin' && password === 'admin123') {
     alert('Login Successful');
 
-    // main page এ redirect
     window.location.href = 'main.html';
   } else {
     alert('Wrong Username or Password');
